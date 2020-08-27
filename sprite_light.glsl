@@ -25,9 +25,9 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)//
     float lightness = clamp(dot(light_vec, texnormal.xyz), 0, 1); //for dot product values below 0, we will just pretend that its 0.
 
     float dist = length(tex_pos - light_pos); //This gives the distance from the light to the pixel position, which we then use to calculate out attenuation
-    float attenuation = 600/pow(dist, 2) * Texel(rim, texture_coords).x;
+    float attenuation = 600/pow(dist, 2) * Texel(rim, texture_coords).x; //Attenuation is then multiplied by the rim mapping to give more structure.
 
-    //float attenuation = mix(0.5, 600/pow(dist, 2), Texel(rim, texture_coords).x);
+    //A bit of ambient light. This ambient light is then multiplied by the ambient occlusion mapping's color.
     vec3 ambient = vec3(0.1, 0.05, 0.15);
     ambient.xyz *= Texel(ambient_occlusion, texture_coords).xxx;
     vec3 light_col = vec3(0.7, 0.5, 0.3);
