@@ -1,14 +1,14 @@
 
 --Screen resolution and how much we should scale up the screen to display in the final viewport
-local resX = 128;
-local resY = 128;
-local scaleUp = 4;
+local resX = 64;
+local resY = 64;
+local scaleUp = 8;
 
 local assets = {}
 local canvas;
 
 local shelves = {
-	{x = 64, y = 64}
+	{x = 32, y = 32}
 }
 local mouse = {x = 0, y= 0};
 
@@ -22,6 +22,8 @@ function love.load ()
 
 	assets.diffuse = love.graphics.newImage("shelf_albedo.png")
 	assets.nd = love.graphics.newImage("shelf_normal_depth.png")
+    assets.ao = love.graphics.newImage("shelf_ao.png")
+	assets.rim = love.graphics.newImage("shelf_rim.png")
 	assets.shader = love.graphics.newShader("sprite_light.glsl")
 
 	canvas = love.graphics.newCanvas(resX, resY)
@@ -35,6 +37,8 @@ function love.draw ()
 	love.graphics.setShader(assets.shader)
 		--Pass the normal map and light position to the shader
 		assets.shader:send("normal",assets.nd);
+        assets.shader:send("ambient_occlusion",assets.ao);
+		assets.shader:send("rim",assets.rim);
 		--Light position is the position of the mouse, but shifted a bit along the z axis.
 		assets.shader:send("light_pos", {mouse.x / scaleUp, mouse.y / scaleUp, light_z});
 		love.graphics.draw(assets.diffuse, shelves[1].x, shelves[1].x, 0, 1, 1, 16, 16) --Draw at center

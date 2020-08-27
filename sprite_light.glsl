@@ -1,4 +1,6 @@
 extern Image normal;
+extern Image ambient_occlusion;
+extern Image rim;
 extern vec3 light_pos;
 
 //Lots of things to explain here!
@@ -23,8 +25,11 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)//
     float lightness = clamp(dot(light_vec, texnormal.xyz), 0, 1); //for dot product values below 0, we will just pretend that its 0.
 
     float dist = length(tex_pos - light_pos); //This gives the distance from the light to the pixel position, which we then use to calculate out attenuation
-    float attenuation = 800/pow(dist, 2);
+    float attenuation = 600/pow(dist, 2) * Texel(rim, texture_coords).x;
+
+    //float attenuation = mix(0.5, 600/pow(dist, 2), Texel(rim, texture_coords).x);
     vec3 ambient = vec3(0.1, 0.05, 0.15);
+    ambient.xyz *= Texel(ambient_occlusion, texture_coords).xxx;
     vec3 light_col = vec3(0.7, 0.5, 0.3);
     //What we are returning:
     //The base color of the texture * the lightness of the sun * sunlight color + ambient color as the rgb channel,
