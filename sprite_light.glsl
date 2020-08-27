@@ -1,10 +1,10 @@
 extern Image normal;
 extern vec3 light_pos;
 
-//Lots of things to explain here! The function NEEDS to be this way, so its basically copied from the love tutorial page
+//Lots of things to explain here!
 //For understanding how things work, I would recommend replacing the textures with the shelf_normal_flat to test with.
 //This should give you more idea of what component is doing what.
-vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)
+vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)//This is the default function header(?) you need to use for it to work with love.
 {
     vec4 texcolor = Texel(texture, texture_coords).xyzw; //This is the color for the texture we just draw, aka the bookshelf.
     vec4 texnormal = Texel(normal, texture_coords).xyzw; //The normal is passed in before the draw call, if you might recall.
