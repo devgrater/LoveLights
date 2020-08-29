@@ -8,11 +8,16 @@ local assets = {}
 local canvas, glow_canvas
 
 local shelves = {
-	{x = 32, y = 32}
+
+}
+
+local shelf = {
+	x = 32, y = 32,
 }
 local mouse = {x = 0, y= 0};
-
 local light_z = 20
+
+--local flat_renderer, shaded_renderer
 
 function love.load ()
 	--Initial settings
@@ -20,25 +25,32 @@ function love.load ()
 	love.graphics.setBackgroundColor(0.0, 0.0, 0.0)
 	love.window.setMode(resX * scaleUp, resY * scaleUp)
 
+	require("renderer")
+	local shelf_tex = love.graphics.newImage("shelf_albedo.png")
+	local shelf_nm = love.graphics.newImage("shelf_normal_depth.png")
+	local shelf_ao = love.graphics.newImage("shelf_ao.png")
+	local shelf_spec = love.graphics.newImage("shelf_spec.png")
+	shelf.renderer = shaded_renderer:new(nil, shelf_tex, shelf_nm, shelf_ao, shelf_spec)
+
+	--[[
 	assets.diffuse = love.graphics.newImage("shelf_albedo.png")
 	assets.nm = love.graphics.newImage("shelf_normal_depth.png")
     assets.ao = love.graphics.newImage("shelf_ao.png")
 	assets.spec = love.graphics.newImage("shelf_spec.png")
 	assets.shader = love.graphics.newShader("sprite_light.glsl")
 	assets.bloomShader = love.graphics.newShader("post_process.glsl")
-	assets.glow = love.graphics.newImage("shelf_glow.png")
+	assets.glow = love.graphics.newImage("shelf_glow.png")]]--
 
 	canvas = love.graphics.newCanvas(resX, resY)
-	glow_canvas = love.graphics.newCanvas(resX, resY)
+	--glow_canvas = love.graphics.newCanvas(resX, resY)
 
-	canvas:setFilter("nearest", "nearest")
 end
 function love.draw ()
 	--First we draw things on a canvas, then we draw the scaled up version of the same canvas on the screen
 	love.graphics.setCanvas(canvas)
 	love.graphics.clear()
-
-	love.graphics.setShader(assets.shader)
+		--[[
+		love.graphics.setShader(assets.shader)
 		--Pass the normal map and light position to the shader
 		assets.shader:send("nm",assets.nm);
         assets.shader:send("ao",assets.ao);
@@ -51,7 +63,8 @@ function love.draw ()
 		love.graphics.setShader() --Make a shader that uses a kernel.
 		--assets.shader:send("screen_res",{resX, resY});
 		--love.graphics.setCanvas(glow_canvas)
-		--love.graphics.draw(assets.glow, shelves[1].x, shelves[1].x, 0, 1, 1, 16, 16) --Draw at center
+		--love.graphics.draw(assets.glow, shelves[1].x, shelves[1].x, 0, 1, 1, 16, 16) --Draw at center]]--
+		shelf.renderer:draw(shelf.x, shelf.y, 16, 16)
 
 	love.graphics.setCanvas()
 
