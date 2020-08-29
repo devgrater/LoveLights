@@ -1,6 +1,6 @@
-extern Image normal;
-extern Image ambient_occlusion;
-extern Image rim;
+extern Image nm;
+extern Image ao;
+extern Image spec;
 extern vec3 light_pos;
 
 //Lots of things to explain here!
@@ -9,7 +9,7 @@ extern vec3 light_pos;
 vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)//This is the default function header(?) you need to use for it to work with love.
 {
     vec4 texcolor = Texel(texture, texture_coords).xyzw; //This is the color for the texture we just draw, aka the bookshelf.
-    vec4 texnormal = Texel(normal, texture_coords).xyzw; //The normal is passed in before the draw call, if you might recall.
+    vec4 texnormal = Texel(nm, texture_coords).xyzw; //The normal is passed in before the draw call, if you might recall.
 
     //The normal is stored in a color map that has range of 0 to 1, but we need to convert the normal
     //such that it becomes a range of -1 to 1.
@@ -17,7 +17,7 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)//
     texnormal.xyz = (texnormal.xyz - 0.5) * 2;
 
     //The texture vector (aka the xyz position of a pixel)
-    vec3 tex_pos = vec3(pixel_coords.xy, texnormal.w - 1); //We used the normal map's alpha channel for z offset.
+    vec3 tex_pos = vec3(pixel_coords.xy, (texnormal.w - 1) * 16); //We used the normal map's alpha channel for z offset.
 
     //Now, calculate out the vector from the light towards the pixel position.
     //The dot product of this vector and the object's normal is a value from -1 to 1, which we can use to determin how much light should be cast on the object.
@@ -25,11 +25,11 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)//
     float lightness = clamp(dot(light_vec, texnormal.xyz), 0, 1); //for dot product values below 0, we will just pretend that its 0.
 
     float dist = length(tex_pos - light_pos); //This gives the distance from the light to the pixel position, which we then use to calculate out attenuation
-    float attenuation = 600/pow(dist, 2) * Texel(rim, texture_coords).x; //Attenuation is then multiplied by the rim mapping to give more structure.
+    float attenuation = 700/pow(dist, 2) * Texel(spec, texture_coords).x; //Attenuation is then multiplied by the rim mapping to give more structure.
 
     //A bit of ambient light. This ambient light is then multiplied by the ambient occlusion mapping's color.
     vec3 ambient = vec3(0.1, 0.05, 0.15);
-    ambient.xyz *= Texel(ambient_occlusion, texture_coords).xxx;
+    ambient.xyz *= Texel(ao, texture_coords).xxx;
     vec3 light_col = vec3(0.7, 0.5, 0.3);
     //What we are returning:
     //The base color of the texture * the lightness of the sun * sunlight color + ambient color as the rgb channel,
