@@ -5,15 +5,15 @@
 ]]--
 
 --Screen resolution and how much we should scale up the screen to display in the final viewport
-local resX = 64;
-local resY = 64;
-local scaleUp = 8;
+resX = 128;
+resY = 128;
+scaleUp = 8;
 
 local assets = {}
 local canvas, glow_canvas
 
 local shelf = {
-	x = 32, y = 32,
+	x = 64, y = 64
 }
 local mouse = {x = 0, y= 0}
 local lights = {}
@@ -26,16 +26,22 @@ function love.load ()
 	love.graphics.setDefaultFilter("nearest", "nearest")
 	love.graphics.setBackgroundColor(0.0, 0.0, 0.0)
 	love.window.setMode(resX * scaleUp, resY * scaleUp)
+	io.stdout:setvbuf("no")
 
 	require("renderer")
 	require("light")
 	local shelf_tex = love.graphics.newImage("textures/shelf_albedo.png")
-	local shelf_nm = love.graphics.newImage("textures/shelf_normal_depth.png")
+	local shelf_nm = love.graphics.newImage("textures/shelf_normal.png")
+	local shelf_depth = love.graphics.newImage("textures/shelf_depth.png")
 	local shelf_ao = love.graphics.newImage("textures/shelf_ao.png")
 	local shelf_spec = love.graphics.newImage("textures/shelf_spec.png")
-	shelf.renderer = shaded_renderer:new(nil, shelf_tex, shelf_nm, shelf_ao, shelf_spec)
+
+	local sphere_tex = love.graphics.newImage("textures/sphere.png")
+	local sphere_depth = love.graphics.newImage("textures/sphere.png")
+	shelf.renderer = shaded_renderer:new(nil, shelf_tex, shelf_nm, shelf_depth, shelf_ao, shelf_spec)
+	--shelf.renderer = shaded_renderer:new(nil, sphere_tex, nil, sphere_depth, nil, nil)
 	lights[1] = light:new({x = 0, y = 0, z = 0, r = 0.0, g = 0.7, b = 1.0})
-	lights[2] = light:new({x = 0, y = 0, z = 0, r = 0.7, g = 0.5, b = 0.3})
+	--lights[2] = light:new({x = 0, y = 0, z = 0, r = 0.7, g = 0.5, b = 0.3})
 	canvas = love.graphics.newCanvas(resX, resY)
 	--glow_canvas = love.graphics.newCanvas(resX, resY)
 
@@ -43,7 +49,7 @@ end
 
 function love.update(dt)
 		lights[1]:setPosition(mouse.x / scaleUp, mouse.y / scaleUp, posZ)
-	lights[2]:setPosition((resX * scaleUp - mouse.x) / scaleUp, (resY * scaleUp - mouse.y) / scaleUp, posZ)
+	--lights[2]:setPosition((resX * scaleUp - mouse.x) / scaleUp, (resY * scaleUp - mouse.y) / scaleUp, posZ)
 end
 
 function love.draw ()

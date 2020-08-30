@@ -1,5 +1,6 @@
 local renderer = {}
 local ph_normal = love.graphics.newImage("placeholders/ph_nm.png");
+local ph_depth = love.graphics.newImage("placeholders/ph_depth.png");
 local ph_specular = love.graphics.newImage("placeholders/ph_spec.png");
 local ph_ao = love.graphics.newImage("placeholders/ph_ao.png");
 local shaded_shader = love.graphics.newShader("shaders/sprite_light.glsl")
@@ -32,10 +33,11 @@ function flat_renderer:draw(x,y,ox,oy)
     love.graphics.draw(self.texture, x, y, 0, 1, 1, ox, oy) --Draw at center
 end
                                                     --            diffuse,        nm,                   ao,                spec
-function shaded_renderer:new(data, texture, normal, ao, specular) --Supported texture: Albedo/Diffuse, Depth-infused Normal, Ambient Occlusion, Specular
+function shaded_renderer:new(data, texture, normal, depth, ao, specular) --Supported texture: Albedo/Diffuse, Depth-infused Normal, Ambient Occlusion, Specular
     data = data or {
         texture = texture,
         nm = normal or ph_normal,
+        depth = depth or ph_depth,
         ao = ao or ph_ao,
         spec = specular or ph_specular
     }
@@ -44,9 +46,14 @@ function shaded_renderer:new(data, texture, normal, ao, specular) --Supported te
     return data
 end
 
+local resX = resX;
+local resY = resY;
+local scaleUp = scaleUp;
+
 function shaded_renderer:draw(x,y,ox,oy,lights)
     love.graphics.setShader(shaded_shader)
     shaded_shader:send("nm",self.nm);
+    shaded_shader:send("depth",self.depth);
     shaded_shader:send("ao",self.ao);
     shaded_shader:send("spec",self.spec);
     local lightIndex = 0
@@ -56,6 +63,8 @@ function shaded_renderer:draw(x,y,ox,oy,lights)
         lightIndex = lightIndex + 1
     end
     shaded_shader:send("light_count", lightIndex)
+    shaded_shader:send("res_x", resX);
+    shaded_shader:send("res_y", resY);
     --Start with light pos only:
     --shaded_shader:send("light_pos", {32, 32, 16});
 
