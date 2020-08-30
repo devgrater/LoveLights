@@ -29,39 +29,27 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)//
     vec3 tex_pos = vec3(pixel_coords.xy, (texnormal.w - 1) * 16); //We used the normal map's alpha channel for z offset.
 
     vec3 resColor = vec3(0.0, 0.0, 0.0);
-    //This is where we need to worry about lights...
-    //if(light_count > 0){
-        for(int i = 0; i < light_count; i++){
-            //Do something with the lights and calculate out the rest.
-            vec3 light_pos = lights[i].light_pos;
-            vec3 light_vec = normalize(light_pos - tex_pos);
-            float lightness = clamp(dot(light_vec, texnormal.xyz), 0, 1);
-            float dist = length(tex_pos - light_pos);
-            float attenuation = 700/pow(dist, 2) * Texel(spec, texture_coords).x;
-            vec3 light_col = lights[i].light_color;
+    for(int i = 0; i < light_count; i++){
+        //Do something with the lights and calculate out the rest.
+        //First we know the position of the light
+        vec3 light_pos = lights[i].light_pos;
+        //Then we know the position of the pixel. By doing a bit of subtraction, we get a vector that points from light to the pixel.
+        vec3 light_vec = normalize(light_pos - tex_pos);
+        //The dot product between this light and the normal is how bright the pixel will be.
+        float lightness = clamp(dot(light_vec, texnormal.xyz), 0, 1);
 
-            resColor.xyz += texcolor.xyz * lightness * light_col * attenuation;
-        }
-   // }
+        float dist = length(tex_pos - light_pos);
+        float attenuation = 700/pow(dist, 2) * Texel(spec, texture_coords).x;
+        vec3 light_col = lights[i].light_color;
 
-
-
-
-    //Now, calculate out the vector from the light towards the pixel position.
-    //The dot product of this vector and the object's normal is a value from -1 to 1, which we can use to determin how much light should be cast on the object.
-    //vec3 light_vec = normalize(light_pos - tex_pos);
-    //float lightness = clamp(dot(light_vec, texnormal.xyz), 0, 1); //for dot product values below 0, we will just pretend that its 0.
-
-    //float dist = length(tex_pos - light_pos); //This gives the distance from the light to the pixel position, which we then use to calculate out attenuation
-    //float attenuation = 700/pow(dist, 2) * Texel(spec, texture_coords).x; //Attenuation is then multiplied by the rim mapping to give more structure.
-
+        resColor.xyz += texcolor.xyz * lightness * light_col * attenuation;
+    }
     //A bit of ambient light. This ambient light is then multiplied by the ambient occlusion mapping's color.
     vec3 ambient = vec3(0.1, 0.05, 0.15);
     ambient.xyz *= Texel(ao, texture_coords).xxx;
-    //vec3 light_col = vec3(0.7, 0.5, 0.3);
     //What we are returning:
     //The base color of the texture * the lightness of the sun * sunlight color + ambient color as the rgb channel,
     //The alpha channel of the texture
     //Times the color which is set by love.graphics.setColor()
-    return vec4(resColor + ambient.xyz,texcolor.w) * color;
+    return vec4((resColor + ambient.xyz),texcolor.w) * color;
 }

@@ -17,7 +17,7 @@ local shelf = {
 }
 local mouse = {x = 0, y= 0}
 local lights = {}
-local posZ = 24;
+local posZ = 16;
 
 --local flat_renderer, shaded_renderer
 
@@ -34,7 +34,7 @@ function love.load ()
 	local shelf_ao = love.graphics.newImage("textures/shelf_ao.png")
 	local shelf_spec = love.graphics.newImage("textures/shelf_spec.png")
 	shelf.renderer = shaded_renderer:new(nil, shelf_tex, shelf_nm, shelf_ao, shelf_spec)
-	lights[1] = light:new({x = 0, y = 0, z = 0, r = 0.1, g = 0.8, b = 1.1})
+	lights[1] = light:new({x = 0, y = 0, z = 0, r = 0.0, g = 0.7, b = 1.0})
 	lights[2] = light:new({x = 0, y = 0, z = 0, r = 0.7, g = 0.5, b = 0.3})
 	canvas = love.graphics.newCanvas(resX, resY)
 	--glow_canvas = love.graphics.newCanvas(resX, resY)
@@ -42,8 +42,8 @@ function love.load ()
 end
 
 function love.update(dt)
-	lights[1]:setPosition(mouse.x / scaleUp, mouse.y / scaleUp, posZ)
-	lights[2]:setPosition((resX * scaleUp - mouse.x) / scaleUp, mouse.y / scaleUp, posZ)
+		lights[1]:setPosition(mouse.x / scaleUp, mouse.y / scaleUp, posZ)
+	lights[2]:setPosition((resX * scaleUp - mouse.x) / scaleUp, (resY * scaleUp - mouse.y) / scaleUp, posZ)
 end
 
 function love.draw ()
