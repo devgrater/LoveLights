@@ -2,7 +2,7 @@ local renderer = {}
 local ph_normal = love.graphics.newImage("placeholders/ph_nm.png");
 local ph_specular = love.graphics.newImage("placeholders/ph_spec.png");
 local ph_ao = love.graphics.newImage("placeholders/ph_ao.png");
-local shaded_shader = love.graphics.newShader("sprite_light.glsl")
+local shaded_shader = love.graphics.newShader("shaders/sprite_light.glsl")
 
 function renderer:new(data)
     --Not implemented, do not use.
@@ -44,13 +44,20 @@ function shaded_renderer:new(data, texture, normal, ao, specular) --Supported te
     return data
 end
 
-function shaded_renderer:draw(x,y,ox,oy)
+function shaded_renderer:draw(x,y,ox,oy,lights)
     love.graphics.setShader(shaded_shader)
     shaded_shader:send("nm",self.nm);
     shaded_shader:send("ao",self.ao);
     shaded_shader:send("spec",self.spec);
-
-    shaded_shader:send("light_pos", {32, 32, 16});
+    local lightIndex = 0
+    for i,v in pairs(lights) do
+        shaded_shader:send("lights[" .. lightIndex .. "].light_pos", {v.x, v.y, v.z})
+        shaded_shader:send("lights[" .. lightIndex .. "].light_color", {v.r, v.g, v.b})
+        lightIndex = lightIndex + 1
+    end
+    shaded_shader:send("light_count", lightIndex)
+    --Start with light pos only:
+    --shaded_shader:send("light_pos", {32, 32, 16});
 
     love.graphics.draw(self.texture, x, y, 0, 1, 1, ox, oy) --Draw at center
     love.graphics.setShader()
