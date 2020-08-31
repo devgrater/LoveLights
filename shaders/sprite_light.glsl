@@ -49,7 +49,7 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)//
         float lightness = clamp(dot(light_vec, texnormal.xyz), 0, 1);
 
         float dist = length(tex_pos - light_pos);
-        float attenuation = 60000/pow(dist, 2) * Texel(spec, texture_coords).x;
+        float attenuation = clamp(60000/pow(dist, 2) * Texel(spec, texture_coords).x, 0, 1);
         vec3 light_col = lights[i].light_color;
 
         /*
