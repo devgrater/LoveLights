@@ -47,7 +47,7 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)//
         float lightness = clamp(dot(light_vec, texnormal.xyz), 0, 1);
 
         float dist = length(tex_pos - light_pos);
-        float attenuation = 700/pow(dist, 2) * Texel(spec, texture_coords).x;
+        float attenuation = min(700/pow(dist, 2) * Texel(spec, texture_coords).x, 1 );
         vec3 light_col = lights[i].light_color;
 
         /*
@@ -76,7 +76,7 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)//
             if(height_check_point.z < height_at_point.x){ //If the point's z value is lower than the z value given from the depth map,
                 //Then the point is in shadows. We no longer need to do the rest checking. Just break out of the loop.
                 float z_difference = height_at_point.x - height_check_point.z;
-                doLighting = clamp(1/(z_difference * 4), 0, 1);
+                doLighting = clamp(1/(z_difference * 2), 0, 1);
                 break;
             }
         }
