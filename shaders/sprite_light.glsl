@@ -1,6 +1,7 @@
 uniform Image nm;
 uniform Image depth;
 uniform Image ao;
+uniform Image sv;
 uniform Image spec;
 uniform vec3 light_pos;
 //These are used for getting the pixel positions.
@@ -28,11 +29,11 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)//
 
     //The normal is stored in a color map that has range of 0 to 1, but we need to convert the normal
     //such that it becomes a range of -1 to 1.
-    texnormal.y = 1 - texnormal.y; //We also need to flip the y axis, because love treats top-left of screen as (0,0), but glsl treats bottom left.
+    //texnormal.y = texnormal.y; //We also need to flip the y axis, because love treats top-left of screen as (0,0), but glsl treats bottom left.
     texnormal.xyz = (texnormal.xyz - 0.5) * 2;
 
     //The texture vector (aka the xyz position of a pixel)
-    vec3 tex_pos = vec3(pixel_coords.xy, (texdepth - 1) * 8); //We used the normal map's alpha channel for z offset.
+    vec3 tex_pos = vec3(pixel_coords.xy, (texdepth) * 8); //We used the normal map's alpha channel for z offset.
 
     vec3 resColor = vec3(0.0, 0.0, 0.0);
     for(int i = 0; i < light_count; i++){
@@ -48,39 +49,47 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)//
         float attenuation = 700/pow(dist, 2) * Texel(spec, texture_coords).x;
         vec3 light_col = lights[i].light_color;
 
-        //Check if we need to cast shadows on self - this sounds difficult.
-        //First, lets calculate out the diagonal distance. This would be the max distance of changes on the x and y axis.
-        float dx = abs(light_pos.x - tex_pos.x);
-        float dy = abs(light_pos.y - tex_pos.y);
-        //float dz = abs(light_pos.z - tex_pos.z);
-        float diag_dist = max(dx, dy);//Takes the max distance as the number of steps to perform
-        float shadowValue = 1.0f;
-        for(float j = 1; j <= diag_dist; j++){
-            //Use this as a percentage to calculate out the points.
-            //Alright, first calculate out the positions.
-            float percentage = j / diag_dist;
-            //This gives me something that resembles a ray.
-            vec3 pixel_pos = (light_pos - tex_pos) * percentage + tex_pos;
+        //Lets try this again:
+        /*
+            First, we know the position of the current point we are working on, (x,y,z)
+            We know the light position (x,y,z)
+            with that, we can calculate out a vector from the pixel to the light.
+        */
+        vec2 vector_to_light = light_pos.xy - tex_pos.xy;
+        float light_distance = length(vector_to_light);
+        //vector_to_light = normalize(vector_to_light);
+        /*
+            By knowing the vector to the light...we travel a small step until we hit the light.
+            This step is determined by... the distance of the vector?
+        */
+        //float steps_to_travel = ceil(length(vector_to_light));
 
-            vec2 tex_uv_pos = vec2(pixel_pos.x / res_x, pixel_pos.y / res_y);
-            float pixel_depth = (Texel(depth, tex_uv_pos).x - 1) * 8;
+        //vec3 working_point = tex_pos;
+        vec3 working_point = vec3(tex_pos.xy, Texel(sv, texture_coords).x * 8);
+        float work_steps = length(tex_pos.xy - light_pos.xy);
+        float doLighting = 1.0;
+        for(float i = 1; i <= work_steps; i++){
+            //now...we get one point over here!
+            vec3 height_check_point = (light_pos - working_point) * (i / work_steps) + working_point;//(tex_pos - light_pos) * i / 40 + light_pos;
+            //Format this point so we can use this in a uv map.
 
-            if(Texel(texture, tex_uv_pos).w <= 0){
-                break;
-            }
-            //Now we can shade the thing using these information.
-            if(tex_pos.z < pixel_depth){//This should give us the ability to tell whether something is blocked by light...
-
-                shadowValue = (1 - (pixel_depth - pixel_pos.z)) / 16.0f;
-                //shadowValue = 0.0f;
+            //The height map is most likely wrong... but how do I fix this?
+            vec2 checkpoint_uv = vec2(floor(height_check_point.x + 0.5) / res_x, floor(height_check_point.y + 0.5) / res_y);
+            //Get the depth texture at this point
+            vec4 height_at_point = Texel(sv, checkpoint_uv) * 8;
+            if(height_check_point.z < height_at_point.x && height_at_point.w != 0){
+                doLighting = 0.2;
+                //doLighting = 1 - (height_check_point.z - height_at_point) / 12;
+                //doLighting = height_at_point;
                 break;
             }
         }
 
-        resColor.xyz += texcolor.xyz * lightness * light_col * attenuation * shadowValue;
+
+        resColor.xyz += texcolor.xyz * lightness * light_col * attenuation * doLighting;
     }
     //A bit of ambient light. This ambient light is then multiplied by the ambient occlusion mapping's color.
-    vec3 ambient = vec3(0.1, 0.05, 0.15);
+    vec3 ambient = vec3(0.1, 0.05, 0.15);// * min(texnormal.x, 0);
     ambient.xyz *= Texel(ao, texture_coords).x;
     //What we are returning:
     //The base color of the texture * the lightness of the sun * sunlight color + ambient color as the rgb channel,

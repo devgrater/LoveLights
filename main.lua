@@ -5,19 +5,21 @@
 ]]--
 
 --Screen resolution and how much we should scale up the screen to display in the final viewport
-resX = 128;
-resY = 128;
+resX = 64;
+resY = 64;
 scaleUp = 8;
 
 local assets = {}
 local canvas, glow_canvas
 
 local shelf = {
-	x = 64, y = 64
+	x = 32, y = 32
 }
 local mouse = {x = 0, y= 0}
 local lights = {}
 local posZ = 16;
+
+local pp
 
 --local flat_renderer, shaded_renderer
 
@@ -32,15 +34,18 @@ function love.load ()
 	require("light")
 	local shelf_tex = love.graphics.newImage("textures/shelf_albedo.png")
 	local shelf_nm = love.graphics.newImage("textures/shelf_normal.png")
-	local shelf_depth = love.graphics.newImage("textures/shelf_depth.png")
+	local shelf_depth = love.graphics.newImage("textures/shelf_depth_mod.png")
+	local shelf_height = love.graphics.newImage("textures/shelf_sv.png")
 	local shelf_ao = love.graphics.newImage("textures/shelf_ao.png")
 	local shelf_spec = love.graphics.newImage("textures/shelf_spec.png")
 
+	pp = love.graphics.newShader("shaders/post_process.glsl");
+
 	local sphere_tex = love.graphics.newImage("textures/sphere.png")
 	local sphere_depth = love.graphics.newImage("textures/sphere.png")
-	shelf.renderer = shaded_renderer:new(nil, shelf_tex, shelf_nm, shelf_depth, shelf_ao, shelf_spec)
+	shelf.renderer = shaded_renderer:new(nil, shelf_tex, shelf_nm, shelf_depth, shelf_height, shelf_ao, shelf_spec)
 	--shelf.renderer = shaded_renderer:new(nil, sphere_tex, nil, sphere_depth, nil, nil)
-	lights[1] = light:new({x = 0, y = 0, z = 0, r = 0.0, g = 0.7, b = 1.0})
+	lights[1] = light:new({x = 0, y = 0, z = 0, r = 0.7, g = 0.5, b = 0.3})--light:new({x = 0, y = 0, z = 0, r = 0.0, g = 0.7, b = 1.0})
 	--lights[2] = light:new({x = 0, y = 0, z = 0, r = 0.7, g = 0.5, b = 0.3})
 	canvas = love.graphics.newCanvas(resX, resY)
 	--glow_canvas = love.graphics.newCanvas(resX, resY)
@@ -60,10 +65,11 @@ function love.draw ()
 		shelf.renderer:draw(shelf.x, shelf.y, 16, 16, lights)
 
 	love.graphics.setCanvas()
-
+	--love.graphics.setShader(pp)
 	-- Now: we have the canvas data stored inside the canvas object.
 	-- Gaussian blur it and we can get a good bloom i guess.
 	love.graphics.draw(canvas, 0, 0, 0, scaleUp, scaleUp)
+	--love.graphics.setShader()
 	--[[
 	love.graphics.setBlendMode("add")
 	love.graphics.setShader(assets.bloomShader)
