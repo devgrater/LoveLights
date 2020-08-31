@@ -54,8 +54,10 @@ local scaleUp = scaleUp;
 
 function shaded_renderer:draw(x,y,ox,oy,lights)
     love.graphics.setShader(shaded_shader)
-    shaded_shader:send("res_x", resX);
-    shaded_shader:send("res_y", resY);
+    shaded_shader:send("res_x", self.texture:getWidth());
+    shaded_shader:send("res_y", self.texture:getHeight());
+    shaded_shader:send("offset_x", x - ox);
+    shaded_shader:send("offset_y", y - oy);
     shaded_shader:send("nm",self.nm);
     shaded_shader:send("sv",self.sv);
     shaded_shader:send("depth",self.depth);

@@ -5,8 +5,10 @@ uniform Image sv;
 uniform Image spec;
 uniform vec3 light_pos;
 //These are used for getting the pixel positions.
-uniform int res_x;
+uniform int res_x; //This should be the resolution of the image
 uniform int res_y;
+uniform int offset_x;
+uniform int offset_y;
 
 struct Light {
     vec3 light_pos;
@@ -74,13 +76,16 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)//
             //Format this point so we can use this in a uv map.
 
             //The height map is most likely wrong... but how do I fix this?
-            vec2 checkpoint_uv = vec2(floor(height_check_point.x + 0.5) / res_x, floor(height_check_point.y + 0.5) / res_y);
+            vec2 checkpoint_uv = vec2(floor(height_check_point.x + 0.5 - offset_x) / res_x, floor(height_check_point.y + 0.5 - offset_y) / res_y);
             //Get the depth texture at this point
             vec4 height_at_point = Texel(sv, checkpoint_uv) * 8;
-            if(height_check_point.z < height_at_point.x && height_at_point.w != 0){
-                doLighting = 0.2;
-                //doLighting = 1 - (height_check_point.z - height_at_point) / 12;
-                //doLighting = height_at_point;
+            if(height_at_point.w == 0){
+                doLighting = 1.0;
+                break; //We are out of the object bounds. No need to continue checking.
+            }
+            if(height_check_point.z < height_at_point.x){
+                float z_difference = height_at_point.x - height_check_point.z;
+                doLighting = clamp(1/(z_difference * 4), 0, 1);
                 break;
             }
         }

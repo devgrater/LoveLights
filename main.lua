@@ -43,7 +43,7 @@ function love.load ()
 
 	local sphere_tex = love.graphics.newImage("textures/sphere.png")
 	local sphere_depth = love.graphics.newImage("textures/sphere.png")
-	shelf.renderer = shaded_renderer:new(nil, shelf_tex, shelf_nm, shelf_depth, shelf_height, shelf_ao, shelf_spec)
+	shelf.renderer = shaded_renderer:new(nil, shelf_tex, shelf_nm, shelf_depth, shelf_depth, shelf_ao, shelf_spec)
 	--shelf.renderer = shaded_renderer:new(nil, sphere_tex, nil, sphere_depth, nil, nil)
 	lights[1] = light:new({x = 0, y = 0, z = 0, r = 0.7, g = 0.5, b = 0.3})--light:new({x = 0, y = 0, z = 0, r = 0.0, g = 0.7, b = 1.0})
 	--lights[2] = light:new({x = 0, y = 0, z = 0, r = 0.7, g = 0.5, b = 0.3})
@@ -62,7 +62,7 @@ function love.draw ()
 	love.graphics.setCanvas(canvas)
 	love.graphics.clear()
 
-		shelf.renderer:draw(shelf.x, shelf.y, 16, 16, lights)
+		shelf.renderer:draw(shelf.x, shelf.y, 32, 32, lights)
 
 	love.graphics.setCanvas()
 	--love.graphics.setShader(pp)
