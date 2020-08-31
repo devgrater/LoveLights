@@ -22,7 +22,6 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)//
 
     //The normal is stored in a color map that has range of 0 to 1, but we need to convert the normal
     //such that it becomes a range of -1 to 1.
-    texnormal.y = 1 - texnormal.y; //We also need to flip the y axis, because love treats top-left of screen as (0,0), but glsl treats bottom left.
     texnormal.xyz = (texnormal.xyz - 0.5) * 2;
 
     //The texture vector (aka the xyz position of a pixel)
