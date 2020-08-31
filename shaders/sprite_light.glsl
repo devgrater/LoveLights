@@ -36,7 +36,7 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)//
     texnormal.xyz = (texnormal.xyz - 0.5) * 2;
 
     //The texture vector (aka the xyz position of a pixel)
-    vec3 tex_pos = vec3(pixel_coords.xy, (texdepth) * 8); //We used the normal map's alpha channel for z offset.
+    vec3 tex_pos = vec3(pixel_coords.xy, (texdepth) * 100); //We used the normal map's alpha channel for z offset.
 
     vec3 resColor = vec3(0.0, 0.0, 0.0);
     for(int i = 0; i < light_count; i++){
@@ -49,7 +49,7 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)//
         float lightness = clamp(dot(light_vec, texnormal.xyz), 0, 1);
 
         float dist = length(tex_pos - light_pos);
-        float attenuation = min(700/pow(dist, 2) * Texel(spec, texture_coords).x, 1 );
+        float attenuation = 60000/pow(dist, 2) * Texel(spec, texture_coords).x;
         vec3 light_col = lights[i].light_color;
 
         /*
@@ -71,7 +71,7 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)//
             //Using the offset, we can get a uv map that's dedicated specifically to the sprite we are drawing.
             vec2 checkpoint_uv = vec2(floor(height_check_point.x + 0.5 - offset_x) / res_x, floor(height_check_point.y + 0.5 - offset_y) / res_y);
             //With this uv, we can get the depth map at the point we want to compare
-            vec4 height_at_point = Texel(depth, checkpoint_uv) * 8;
+            vec4 height_at_point = Texel(depth, checkpoint_uv) * 100;
             if(height_at_point.w == 0){
                 break; //We are out of the object bounds. No need to continue checking.
             }

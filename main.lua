@@ -5,19 +5,19 @@
 ]]--
 
 --Screen resolution and how much we should scale up the screen to display in the final viewport
-resX = 64;
-resY = 64;
-scaleUp = 8;
+resX = 600;
+resY = 300;
+scaleUp = 2;
 
 local assets = {}
 local canvas, glow_canvas
 
 local shelf = {
-	x = 32, y = 32
+	x = 300, y = 150
 }
 local mouse = {x = 0, y= 0}
 local lights = {}
-local posZ = 20;
+local posZ = 300;
 
 --local flat_renderer, shaded_renderer
 
@@ -54,7 +54,7 @@ function love.draw ()
 	love.graphics.setCanvas(canvas)
 	love.graphics.clear()
 
-		shelf.renderer:draw(shelf.x, shelf.y, 16, 16, lights)
+		shelf.renderer:draw(shelf.x, shelf.y, 75, 75, lights)
 
 	love.graphics.setCanvas()
 	-- Now: we have the canvas data stored inside the canvas object.
