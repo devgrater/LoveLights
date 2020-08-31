@@ -34,12 +34,11 @@ function flat_renderer:draw(x,y,ox,oy)
     love.graphics.draw(self.texture, x, y, 0, 1, 1, ox, oy) --Draw at center
 end
                                                     --            diffuse,        nm,                   ao,                spec
-function shaded_renderer:new(data, texture, normal, depth, sv, ao, specular) --Supported texture: Albedo/Diffuse, Depth-infused Normal, Ambient Occlusion, Specular
+function shaded_renderer:new(data, texture, normal, depth, ao, specular) --Supported texture: Albedo/Diffuse, Depth-infused Normal, Ambient Occlusion, Specular
     data = data or {
         texture = texture,
         nm = normal or ph_normal,
         depth = depth or ph_depth,
-        sv = sv or ph_sv,
         ao = ao or ph_ao,
         spec = specular or ph_specular
     }
@@ -59,7 +58,6 @@ function shaded_renderer:draw(x,y,ox,oy,lights)
     shaded_shader:send("offset_x", x - ox);
     shaded_shader:send("offset_y", y - oy);
     shaded_shader:send("nm",self.nm);
-    shaded_shader:send("sv",self.sv);
     shaded_shader:send("depth",self.depth);
     shaded_shader:send("ao",self.ao);
     shaded_shader:send("spec",self.spec);
@@ -70,10 +68,6 @@ function shaded_renderer:draw(x,y,ox,oy,lights)
         lightIndex = lightIndex + 1
     end
     shaded_shader:send("light_count", lightIndex)
-
-    --Start with light pos only:
-    --shaded_shader:send("light_pos", {32, 32, 16});
-
     love.graphics.draw(self.texture, x, y, 0, 1, 1, ox, oy) --Draw at center
     love.graphics.setShader()
 end

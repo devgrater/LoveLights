@@ -1,7 +1,6 @@
 uniform Image nm;
 uniform Image depth;
 uniform Image ao;
-uniform Image sv;
 uniform Image spec;
 uniform vec3 light_pos;
 //These are used for getting the pixel positions.
@@ -51,46 +50,36 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords)//
         float attenuation = 700/pow(dist, 2) * Texel(spec, texture_coords).x;
         vec3 light_col = lights[i].light_color;
 
-        //Lets try this again:
         /*
-            First, we know the position of the current point we are working on, (x,y,z)
-            We know the light position (x,y,z)
-            with that, we can calculate out a vector from the pixel to the light.
+            Height map based self shadow:
+            First, we take a line from the testing point towards the light.
+            We linearly interpolate this line and for each point,
+            compare the interpolated z value and the z value from the height map at the same point.
+            If the height map has a higher z value, then the point should be in shadow.
+            Otherwise, the point is in lights.
         */
         vec2 vector_to_light = light_pos.xy - tex_pos.xy;
-        float light_distance = length(vector_to_light);
-        //vector_to_light = normalize(vector_to_light);
-        /*
-            By knowing the vector to the light...we travel a small step until we hit the light.
-            This step is determined by... the distance of the vector?
-        */
-        //float steps_to_travel = ceil(length(vector_to_light));
-
-        //vec3 working_point = tex_pos;
-        vec3 working_point = vec3(tex_pos.xy, Texel(sv, texture_coords).x * 8);
-        float work_steps = length(tex_pos.xy - light_pos.xy);
+        vec3 working_point = tex_pos; //This is the point that we need to check whether its in shadow or not.
+        float work_steps = length(tex_pos.xy - light_pos.xy); //The distance is basically how many points we are checking.
         float doLighting = 1.0;
         for(float i = 1; i <= work_steps; i++){
-            //now...we get one point over here!
-            vec3 height_check_point = (light_pos - working_point) * (i / work_steps) + working_point;//(tex_pos - light_pos) * i / 40 + light_pos;
-            //Format this point so we can use this in a uv map.
+            //Linearly interpolate the point towards the light.
+            vec3 height_check_point = (light_pos - working_point) * (i / work_steps) + working_point;
 
-            //The height map is most likely wrong... but how do I fix this?
+            //Using the offset, we can get a uv map that's dedicated specifically to the sprite we are drawing.
             vec2 checkpoint_uv = vec2(floor(height_check_point.x + 0.5 - offset_x) / res_x, floor(height_check_point.y + 0.5 - offset_y) / res_y);
-            //Get the depth texture at this point
-            vec4 height_at_point = Texel(sv, checkpoint_uv) * 8;
+            //With this uv, we can get the depth map at the point we want to compare
+            vec4 height_at_point = Texel(depth, checkpoint_uv) * 8;
             if(height_at_point.w == 0){
-                doLighting = 1.0;
                 break; //We are out of the object bounds. No need to continue checking.
             }
-            if(height_check_point.z < height_at_point.x){
+            if(height_check_point.z < height_at_point.x){ //If the point's z value is lower than the z value given from the depth map,
+                //Then the point is in shadows. We no longer need to do the rest checking. Just break out of the loop.
                 float z_difference = height_at_point.x - height_check_point.z;
                 doLighting = clamp(1/(z_difference * 4), 0, 1);
                 break;
             }
         }
-
-
         resColor.xyz += texcolor.xyz * lightness * light_col * attenuation * doLighting;
     }
     //A bit of ambient light. This ambient light is then multiplied by the ambient occlusion mapping's color.
