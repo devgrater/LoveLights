@@ -38,7 +38,7 @@ function love.load ()
 	shelf.renderer = shaded_renderer:new(nil, shelf_tex, shelf_nm, shelf_depth, shelf_ao, shelf_spec)
 	--shelf.renderer = shaded_renderer:new(nil, sphere_tex, nil, sphere_depth, nil, nil)
 	lights[1] = light:new({x = 0, y = 0, z = 0, r = 0.0, g = 0.7, b = 1.0})
-	lights[2] = light:new({x = 0, y = 0, z = 0, r = 0.7, g = 0.5, b = 0.3})
+	--lights[2] = light:new({x = 0, y = 0, z = 0, r = 0.7, g = 0.5, b = 0.3})
 	canvas = love.graphics.newCanvas(resX, resY)
 	--glow_canvas = love.graphics.newCanvas(resX, resY)
 
@@ -46,7 +46,7 @@ end
 
 function love.update(dt)
 	lights[1]:setPosition(mouse.x / scaleUp, mouse.y / scaleUp, posZ)
-	lights[2]:setPosition((resX * scaleUp - mouse.x) / scaleUp, (resY * scaleUp - mouse.y) / scaleUp, posZ)
+	--lights[2]:setPosition((resX * scaleUp - mouse.x) / scaleUp, (resY * scaleUp - mouse.y) / scaleUp, posZ)
 end
 
 function love.draw ()

@@ -13,6 +13,8 @@ struct Light {
     vec3 light_pos;
     vec3 light_color;
 };
+
+// credits to ashleyjamesy for teaching me how to do this
 const int MAX_LIGHTS = 8; // Max 8 lights
 //const int MAX_RAY_STEPS = 15;
 uniform Light lights[MAX_LIGHTS];
