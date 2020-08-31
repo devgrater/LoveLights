@@ -1,3 +1,3 @@
 # LoveLights
 # Prerequisites
-[Love2D](love2d.org)
+[Love2D](https://love2d.org)
